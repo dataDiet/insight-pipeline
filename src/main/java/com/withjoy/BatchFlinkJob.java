@@ -65,7 +65,7 @@ public class BatchFlinkJob {
             
             final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
            
-            DataSet<String> text = env.readTextFile("s3a://joy.datastore/"+params.get("input"));
+            DataSet<String> text = env.readTextFile(params.get("input"));
             DataSet<String> counts = text.map(new Parser());
             
             if (params.has("output")) {
