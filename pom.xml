@@ -19,14 +19,13 @@ Unless required by applicable law or agreed to in writing,
        <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
        <modelVersion>4.0.0</modelVersion>
-
+       <artifactId>insight-pipeline</artifactId>
        <groupId>com.withjoy</groupId>
-       <artifactId>insight-joy-pipeline</artifactId>
        <version>0.1</version>
        <packaging>jar</packaging>
 
-       <name>Flink Quickstart Job</name>
-       <url>http://www.myorganization.org</url>
+       <name>Joy Project</name>
+       <url>http://withjoy.com</url>
        <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
        <flink.version>1.3.0</flink.version>
@@ -123,6 +122,17 @@ Unless required by applicable law or agreed to in writing,
             <artifactId>postgresql</artifactId>
             <version>9.4-1200-jdbc41</version>
        </dependency>
+       <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.3</version>
+       </dependency>
+       <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20090211</version>
+        </dependency>
+       
        </dependencies>
 
        <profiles>

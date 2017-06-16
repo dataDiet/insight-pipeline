@@ -30,7 +30,7 @@ def main():
 	for object in my_bucket.objects.all():
 		files_complete.add(object.key)
 	for table in records:
-		if table not in files_complete:
+		if table not in files_complete and table !='tracks':
 			try:	
 				with open(table,'w') as h:
 					cursor.copy_to(h,"%s.%s" % (settings_dict['pg_schema'],table))
