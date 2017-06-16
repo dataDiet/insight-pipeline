@@ -35,16 +35,16 @@ public class ReadPostgreSQL {
 		sqle = sqle.getNextException();
 	}
 
-	public static HashMap<String, Integer> getSQLHash(String query, String single_input){
+	public static HashMap<String, Integer> getSQLHash(String query){
 		HashMap<String, Integer> hash = new HashMap<>();
 		try{
 			Connection input = getConnection();
 			PreparedStatement prepared_statement = input.prepareStatement(query);
-			prepared_statement.setString(1, single_input);
 			ResultSet result_set = prepared_statement.executeQuery();
-
-			while(result_set.next()){
-				hash.put(result_set.getString(1), Integer.parseInt(result_set.getString(2)));
+                        ResultSetMetaData result_metadata = result_set.getMetaData();
+                        int columnCount = result_metadata.getColumnCount();
+			for (int i = 1; i <= columnCount; i++ ) {
+    				hash.put(result_metadata.getColumnName(i),(Integer)i);
 			}
 			input.close();
 		}
