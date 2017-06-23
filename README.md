@@ -38,7 +38,7 @@ Because I anticipated that growth in event traffic would need to accomodate real
 
 In summary, the pipeline was thus:
 
-![Pipeline](https://github.com/dataDiet/insight-pipeline/images/pipeline.png)
+![Pipeline](https://github.com/dataDiet/insight-pipeline/blob/master/images/pipeline.png)
 
 The multiple Kafka consumers help distribute the column joining operations described above and the Kafka architecture as a whole can be used to efficiently and expeditiously send messages to Redshift.  You might ask why the data was not sent to Redshift in individual calls conducted over JDBC.  The reason has to do with the inefficiency of consecutive single row insertions as outlined [here](http://docs.aws.amazon.com/redshift/latest/dg/c_loading-data-best-practices.html).
 
