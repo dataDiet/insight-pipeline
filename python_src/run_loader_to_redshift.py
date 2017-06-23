@@ -7,7 +7,7 @@ def main():
     PROPERTIES = 'properties.txt'
     property_config = config_properties.PropertyConfig()
     property_config.importProperties(PROPERTIES)
-
+    # setup a connection to redshift
     conn_string = "host = '%s' dbname='%s' user='%s' password='%s' port=%s" % (
         property_config.getProperty('rs_host'),
         property_config.getProperty('rs_db'),
@@ -15,6 +15,7 @@ def main():
         property_config.getProperty('rs_pass'),
         property_config.getProperty('rs_port'))
 
+    # continuously perform SSH copies to Redshift in micro-batch chunks
     while (True):
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()

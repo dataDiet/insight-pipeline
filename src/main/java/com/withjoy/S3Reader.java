@@ -14,50 +14,57 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+
 /**
  *
  * @author akiramadono
  */
 public class S3Reader {
 
-  public static final int BUFFER_SIZE = 64 * 1024;
+    public static final int BUFFER_SIZE = 64 * 1024;
 
-  private AmazonS3 s3;
+    private AmazonS3 s3;
 
-  public S3Reader(String accessKey, String secretKey) {
-      
-      BasicAWSCredentials creds = new BasicAWSCredentials(accessKey, secretKey); 
-      s3 = AmazonS3ClientBuilder.standard()
-              .withRegion(Regions.US_WEST_1)
-              .withCredentials(new AWSStaticCredentialsProvider(creds)).build();
-  }
-  
-  public void getListObjectKeys(String bucketName, List<String> files){
-      final ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(bucketName).withMaxKeys(1);
-            ListObjectsV2Result result;
-            do {               
-               result = s3.listObjectsV2(req);               
-               for (S3ObjectSummary objectSummary : 
-                   result.getObjectSummaries()) {
-                        files.add(objectSummary.getKey());
-                   }
-               req.setContinuationToken(result.getNextContinuationToken());
-            } while(result.isTruncated() == true ); 
-  }
+    public S3Reader(String accessKey, String secretKey) {
 
-  /**
-   * Read a character oriented file from S3
-   *
-   * @param bucketName  Name of bucket
-   * @param key         File Name
-   * @throws IOException
-   * @return BufferedReader
-   */
-  public BufferedReader readFromS3(String bucketName, String key) throws IOException {
-    S3Object s3object = s3.getObject(new GetObjectRequest(
-            bucketName, key));
-    System.out.println(s3object.getObjectMetadata().getContentType());
-    System.out.println(s3object.getObjectMetadata().getContentLength());
-    return new BufferedReader(new InputStreamReader(s3object.getObjectContent()));
-  }
+        BasicAWSCredentials creds = new BasicAWSCredentials(accessKey, secretKey);
+        s3 = AmazonS3ClientBuilder.standard()
+                .withRegion(Regions.US_WEST_1)
+                .withCredentials(new AWSStaticCredentialsProvider(creds)).build();
+    }
+
+    /**
+     * Generate file names in S3 for given bucket
+     *
+     * @param bucketName Name of bucket
+     * @param files File name list to fill
+     */
+    public void getListObjectKeys(String bucketName, List<String> files) {
+        final ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(bucketName).withMaxKeys(1);
+        ListObjectsV2Result result;
+        do {
+            result = s3.listObjectsV2(req);
+            for (S3ObjectSummary objectSummary
+                    : result.getObjectSummaries()) {
+                files.add(objectSummary.getKey());
+            }
+            req.setContinuationToken(result.getNextContinuationToken());
+        } while (result.isTruncated() == true);
+    }
+
+    /**
+     * Read a character oriented file from S3
+     *
+     * @param bucketName Name of bucket
+     * @param key File Name
+     * @throws IOException
+     * @return BufferedReader
+     */
+    public BufferedReader readFromS3(String bucketName, String key) throws IOException {
+        S3Object s3object = s3.getObject(new GetObjectRequest(
+                bucketName, key));
+        System.out.println(s3object.getObjectMetadata().getContentType());
+        System.out.println(s3object.getObjectMetadata().getContentLength());
+        return new BufferedReader(new InputStreamReader(s3object.getObjectContent()));
+    }
 }

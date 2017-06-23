@@ -7,6 +7,7 @@ import boto3
 
 
 def main():
+    # Get postgreSQL database connections set
     PROPERTIES = 'properties.txt'
     property_config = config_properties.PropertyConfig()
     property_config.importProperties(PROPERTIES)
@@ -17,7 +18,7 @@ def main():
         property_config.getProperty('pg_pass')
     )
 
-    # acquire relevant tables
+    # acquire relevant tables (will take a while if starting from scracth and then send to s3 upon receiving
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     cursor.execute(

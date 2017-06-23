@@ -74,24 +74,10 @@ Unless required by applicable law or agreed to in writing,
 
        <dependencies>
        <!-- Apache Flink dependencies -->
-       <dependency>
-       <groupId>org.apache.flink</groupId>
-       <artifactId>flink-java</artifactId>
-       <version>${flink.version}</version>
-       </dependency>
-       <dependency>
-       <groupId>org.apache.flink</groupId>
-       <artifactId>flink-streaming-java_2.10</artifactId>
-       <version>${flink.version}</version>
-       </dependency>
-       <dependency>
-       <groupId>org.apache.flink</groupId>
-       <artifactId>flink-clients_2.10</artifactId>
-       <version>${flink.version}</version>
-       </dependency>
 
        <!-- explicitly add a standard loggin framework, as Flink does not have
        a hard dependency on one specific framework by default -->
+   
        <dependency>
        <groupId>org.slf4j</groupId>
        <artifactId>slf4j-log4j12</artifactId>
@@ -106,11 +92,6 @@ Unless required by applicable law or agreed to in writing,
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
             <version>0.10.2.1</version>
-       </dependency>
-       <dependency>
-           <groupId>org.apache.flink</groupId>
-           <artifactId>flink-connector-kafka</artifactId>
-           <version>0.9.1</version>
        </dependency>
        <dependency>
             <groupId>com.amazonaws</groupId>
@@ -145,24 +126,6 @@ Unless required by applicable law or agreed to in writing,
        </activation>
 
        <dependencies>
-       <dependency>
-       <groupId>org.apache.flink</groupId>
-       <artifactId>flink-java</artifactId>
-       <version>${flink.version}</version>
-       <scope>provided</scope>
-       </dependency>
-       <dependency>
-       <groupId>org.apache.flink</groupId>
-       <artifactId>flink-streaming-java_2.10</artifactId>
-       <version>${flink.version}</version>
-       <scope>provided</scope>
-       </dependency>
-       <dependency>
-       <groupId>org.apache.flink</groupId>
-       <artifactId>flink-clients_2.10</artifactId>
-       <version>${flink.version}</version>
-       <scope>provided</scope>
-       </dependency>
        <dependency>
        <groupId>org.slf4j</groupId>
        <artifactId>slf4j-log4j12</artifactId>
@@ -208,7 +171,22 @@ Unless required by applicable law or agreed to in writing,
        <!-- We use the maven-shade plugin to create a fat jar that contains all dependencies
        except flink and its transitive dependencies. The resulting fat-jar can be executed
        on a cluster. Change the value of Program-Class if your program entry point changes. -->
-       <plugin>
+        <plugin>
+			                <artifactId>maven-assembly-plugin</artifactId>
+					                <configuration>
+							                    <archive>
+									                            <manifest>
+												                                <mainClass>com.spnotes.kafka.simple.Producer</mainClass>
+																                        </manifest>
+																			                    </archive>
+																					                        <descriptorRefs>
+																								                        <descriptorRef>jar-with-dependencies</descriptorRef>
+																											                    </descriptorRefs>
+																													                    </configuration>
+																															                </plugin>
+
+           <plugin>
+           
        <groupId>org.apache.maven.plugins</groupId>
        <artifactId>maven-shade-plugin</artifactId>
        <version>2.4.1</version>

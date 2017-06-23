@@ -4,8 +4,10 @@ import json
 import subprocess
 import re
 
+# class file for configuring properties file information
 
 class PropertyConfig:
+
     def __init__(self):
         self.properties = {}
 
