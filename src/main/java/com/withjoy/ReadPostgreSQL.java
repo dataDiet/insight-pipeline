@@ -21,16 +21,15 @@ public class ReadPostgreSQL {
                 String passWord = sql_properties.getProperty("pg_pass");
                 
 		String url = "jdbc:postgresql://"+hostName+":"+port+"/"+database+"?user="+userName+"&password="+passWord;
-		System.out.println(url);
 		Connection conn = DriverManager.getConnection(url);
 		return conn;
 	}
 
 	public static void printSQLException(SQLException sqle){
-		System.out.println("\n---SQLException Caught---\n");
-		System.out.println("SQLState: " + sqle.getSQLState());
-		System.out.println("Severity: " + sqle.getErrorCode());
-		System.out.println("Message: " + sqle.getMessage());
+		System.err.println("\n---SQLException Caught---\n");
+		System.err.println("SQLState: " + sqle.getSQLState());
+		System.err.println("Severity: " + sqle.getErrorCode());
+		System.err.println("Message: " + sqle.getMessage());
 		sqle.printStackTrace();
 		sqle = sqle.getNextException();
 	}
