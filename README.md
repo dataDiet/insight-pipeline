@@ -44,3 +44,55 @@ The multiple Kafka consumers help distribute the column joining operations descr
 
 The schema of the database in Redshift is relatively straightforward.  Each table in Redshift can have a sortkey and distribution key.  In my implementation I chose to make the distribution key the id field for both the events and metadata tables.  The form of my metadata tables was essentially an `id` for every customer in the company, and associated relatively stable information.  The distribution key was distributed with distribution style EVEN for the large events table and the metadata table was distributed with style ALL.  The Amazon documentation provides a tutorial behind these options [here](http://docs.aws.amazon.com/redshift/latest/dg/tutorial-tuning-tables.html).  In short, these choices are optimal for joins between a very small table and a very large table as the most frequent use case.  If the small metadata table is copied over multiple slices it is not a huge penalty because it is a small table.  Because activities concerning the same `id` are ensured to be collocated by the EVEN style on the events table, the join between the two tables will occur in a collocated manner at all times. As for a sort key, the easy and obvious choice is the timestamp column as the length of these tables is most easily reduced by a filter by time.
 
+# Setup and Implementation
+
+For the setup and installation, I relied upon the [pegasus](https://github.com/InsightDataScience/pegasus) set of deployment scripts provided by Insight combined with some custom configuration scripts.  The steps are given here:
+
+Installation requirements:
+
+- pegasus
+- access to EC2 and Redshift clusters
+
+1. Assuming the repot files shown here along with a properties file `properties.txt` in `./python_src` spin up EC2 clusters on AWS.
+```
+peg up master.yml
+peg up workers.yml
+```
+2. Start a Redshift cluster as shown [here](http://docs.aws.amazon.com/redshift/latest/gsg/rs-gsg-launch-sample-cluster.html).
+
+3. Load relevant tables into S3 (my script for downloading is `python_src\download_to_s3.py`.
+
+4. Retrieve configurations.
+```
+./python_src/setup_configuration.py
+```
+5. Install necessary components to EC2.
+```
+peg install <cluster-name> ssh
+peg install <cluster-name> aws
+peg install <cluster-name> zookeeper
+peg install <cluster-name> kafka
+```
+Set security groups in AWS as outlined in [Step 3](http://docs.aws.amazon.com/redshift/latest/dg/load-from-host-steps-configure-security-groups.html) of the AWS Redshift SSH Copy documentation.
+
+6. Initiate services and start streaming data to Redshift
+Start Zookeeper
+```
+peg service awesome zookeeper start
+```
+Start Kafka
+```
+peg service awesome kafka start
+```
+After SSH entry into the master node, initialize kafka and appropriate broker settings.
+```
+$KAFKA_HOME/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 4 --topic test --config retention.ms=300000
+```
+Initiate the producer process
+```
+java -cp insight-pipeline-0.1-jar-with-dependencies.jar com.withjoy.Producer test
+```
+The final python script initiates the SSH copy from EC2 to Redshift via the Consumers on the EC2 nodes.
+```
+./python_src/run_loader_to_redshift.py
+```
