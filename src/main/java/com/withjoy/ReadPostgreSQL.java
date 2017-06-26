@@ -18,7 +18,7 @@ public class ReadPostgreSQL {
      * @return
      * @throws SQLException
      */
-    public static Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         Properties sql_properties = new AcquireProperties("properties.txt").getProperties();
         String hostName = sql_properties.getProperty("pg_host");
         String port = sql_properties.getProperty("pg_port");
@@ -36,7 +36,7 @@ public class ReadPostgreSQL {
      *
      * @param sqle SQLException object
      */
-    public static void printSQLException(SQLException sqle) {
+    public void printSQLException(SQLException sqle) {
         System.err.println("\n---SQLException Caught---\n");
         System.err.println("SQLState: " + sqle.getSQLState());
         System.err.println("Severity: " + sqle.getErrorCode());
@@ -50,12 +50,11 @@ public class ReadPostgreSQL {
      * Query
      *
      * @param query
-     * @return HashMap between column names and ordering
+     * @return         HashMap between column names and ordering
      */
-    public static HashMap<String, Integer> getSQLHash(String query) {
+    public HashMap<String, Integer> getSQLHash(String query) {
         HashMap<String, Integer> hash = new HashMap<>();
-        try {
-            Connection input = getConnection();
+        try (Connection input = getConnection()){
             PreparedStatement prepared_statement = input.prepareStatement(query);
             ResultSet result_set = prepared_statement.executeQuery();
             ResultSetMetaData result_metadata = result_set.getMetaData();
@@ -69,4 +68,12 @@ public class ReadPostgreSQL {
         }
         return hash;
     }
+    
+    public HashMap<String,Integer> GetTableData(String table) {
+        Properties properties = new AcquireProperties("properties.txt").getProperties();
+        String schema = properties.getProperty("pg_schema");
+        return new HashMap<>(
+                getSQLHash("SELECT * FROM " + schema + "." + table + " LIMIT 1"));        
+    }
+    
 }

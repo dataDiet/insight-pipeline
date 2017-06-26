@@ -25,11 +25,11 @@ public class S3Reader {
 
     private AmazonS3 s3;
 
-    public S3Reader(String accessKey, String secretKey) {
+    public S3Reader(String accessKey, String secretKey, String region) {
 
         BasicAWSCredentials creds = new BasicAWSCredentials(accessKey, secretKey);
         s3 = AmazonS3ClientBuilder.standard()
-                .withRegion(Regions.US_WEST_1)
+                .withRegion(Regions.valueOf(region.replace("-", "_").toUpperCase()))
                 .withCredentials(new AWSStaticCredentialsProvider(creds)).build();
     }
 
