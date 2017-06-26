@@ -81,7 +81,6 @@ public class Consumer {
             Properties kafka_consumer_config_properties = new Properties();
             
             kafka_consumer_config_properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getProperty("host_port_pairs"));
-//            kafka_consumer_config_properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
             kafka_consumer_config_properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
             kafka_consumer_config_properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
             kafka_consumer_config_properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -98,6 +97,7 @@ public class Consumer {
             try {
                 outerloop:
                 while (true) {
+                    
                     ConsumerRecords<String, String> records = kafkaConsumer.poll(1000);
                     for (ConsumerRecord<String, String> record : records) {
                         if (record != null) {

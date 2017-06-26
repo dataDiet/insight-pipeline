@@ -51,16 +51,15 @@ public class Producer {
         //setup configuration for producer including cluster node ip host:port pairs
         Properties kafka_producer_config_properties = new Properties();
         kafka_producer_config_properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getProperty("host_port_pairs")); 
-//        kafka_producer_config_properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092"); 
         kafka_producer_config_properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer");
         kafka_producer_config_properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
+        kafka_producer_config_properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 300000);
+        
         org.apache.kafka.clients.producer.Producer<String, String> producer = new KafkaProducer<>(kafka_producer_config_properties);
-
         try {
             // read in files from s3 and send to the Consumer
             for (String table : s3_file_list) {
-            //String table="close_event_name";
-            s3_reader = s3_in.readFromS3(properties.getProperty("aws_bucket"), table);
+                s3_reader = s3_in.readFromS3(properties.getProperty("aws_bucket"), table);
                 String line;
                 while ((line = s3_reader.readLine()) != null) {
                     ProducerRecord<String, String> rec = new ProducerRecord<String, String>(topicName, table + "|" + line);
