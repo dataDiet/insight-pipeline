@@ -22,6 +22,10 @@ import java.util.*;
 import org.apache.kafka.clients.producer.*;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Collections;
+import org.apache.kafka.common.MetricName;
+import org.apache.kafka.common.Metric;
+
 
 /**
  *
@@ -43,18 +47,18 @@ public class Producer {
         Properties properties = new AcquireProperties("properties.txt").getProperties();
         BufferedReader s3_reader = null;
 
-        s3_in = new S3Reader(properties.getProperty("aws_id"), 
-                                properties.getProperty("aws_secret"),
-                                properties.getProperty("aws_region"));
+        s3_in = new S3Reader(properties.getProperty("aws_id"),
+                properties.getProperty("aws_secret"),
+                properties.getProperty("aws_region"));
         s3_in.getListObjectKeys(properties.getProperty("aws_bucket"), s3_file_list);
 
         //setup configuration for producer including cluster node ip host:port pairs
         Properties kafka_producer_config_properties = new Properties();
-        kafka_producer_config_properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getProperty("host_port_pairs")); 
-        kafka_producer_config_properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer");
+        kafka_producer_config_properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getProperty("host_port_pairs"));
+        kafka_producer_config_properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         kafka_producer_config_properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-        kafka_producer_config_properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 300000);
-        
+        kafka_producer_config_properties.put(ProducerConfig.BATCH_SIZE_CONFIG,Integer.parseInt(properties.getProperty("kafka_producer_batch_size")));
+        kafka_producer_config_properties.put(ProducerConfig.LINGER_MS_CONFIG,Integer.parseInt(properties.getProperty("kafka_producer_linger_ms")));
         org.apache.kafka.clients.producer.Producer<String, String> producer = new KafkaProducer<>(kafka_producer_config_properties);
         try {
             // read in files from s3 and send to the Consumer
@@ -62,7 +66,7 @@ public class Producer {
                 s3_reader = s3_in.readFromS3(properties.getProperty("aws_bucket"), table);
                 String line;
                 while ((line = s3_reader.readLine()) != null) {
-                    ProducerRecord<String, String> rec = new ProducerRecord<String, String>(topicName, table + "|" + line);
+                    ProducerRecord<String, String> rec = new ProducerRecord<>(topicName, table + "|" + line);
                     producer.send(rec);
                 }
             }

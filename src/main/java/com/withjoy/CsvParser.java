@@ -43,7 +43,7 @@ public class CsvParser {
             }
         }
     }
-    
+
     public TreeMap<Integer, Integer> getMain(){
         return reference_colnum_activity_colnum;
     }

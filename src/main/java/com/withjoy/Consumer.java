@@ -85,24 +85,25 @@ public class Consumer {
             kafka_consumer_config_properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
             kafka_consumer_config_properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
             kafka_consumer_config_properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-
+            kafka_consumer_config_properties.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG,Integer.parseInt(properties.getProperty("kafka_consumer_fetch_min_bytes")));
             //Initialize Kafka Consumer
             kafkaConsumer = new KafkaConsumer<>(kafka_consumer_config_properties);
             kafkaConsumer.subscribe(Arrays.asList(topicName));
             List<ConsumerRecord<String, String>> buffer = new ArrayList<>();
-            final int min_batch_size = Integer.parseInt(properties.getProperty("min_batch_size"));
-
+            final int min_batch_size = Integer.parseInt(properties.getProperty("rs_min_batch_rows"));
+            
             int record_number = 0;
             //Start processing messages
             try {
                 outerloop:
                 while (true) {
                     
-                    ConsumerRecords<String, String> records = kafkaConsumer.poll(1000);
+                    ConsumerRecords<String, String> records = kafkaConsumer.poll(Integer.parseInt(properties.getProperty("kafka_consumer_poll")));
                     for (ConsumerRecord<String, String> record : records) {
                         if (record != null) {
                             System.out.println(csvStringProcessor(record.value()));
                         }
+                        
                         if (record_number > min_batch_size) {
                             kafkaConsumer.commitSync();
                             break outerloop;
@@ -134,7 +135,7 @@ public class Consumer {
         String table = input.substring(0, pipe_position);
         input = input.substring(pipe_position + 1).replace("|", "");
         List<String> output_right = new ArrayList<>();
-        List<String> tsv_row = new ArrayList<>();
+        List<String> output_left = new ArrayList<>();
         try{
             if (!current_table_name.equals(table)) {
                 csv_parser = new CsvParser(table);
@@ -147,20 +148,21 @@ public class Consumer {
                     Integer array_mapping = entry.getValue();
                     
                     if(array_mapping.equals(-1)){
-                        tsv_row.add("");
+                        output_left.add("");
                     }
                     else{
                         String record=csv_records.get(array_mapping -1);
-                        tsv_row.add((record == null) ? "": record);
+                        output_left.add((record == null) ? "": record.trim());
+
                     }
                 }
                 for(Entry<String, Integer> entry: csv_parser.getExtra().entrySet()){
                     String record = csv_records.get(entry.getValue()-1);
-                    String record_store = (record == null) ? "" : record;
+                    String record_store = (record == null) ? "" : record.trim();
                     output_right.add('"'+entry.getKey()+'"'+":" + '"'+record_store+'"');
                 } 
             }
-            return String.join("|", tsv_row) + '|' + '{'+String.join(",",output_right)+'}';
+            return String.join("|", output_left) + '|' + '{'+String.join(",",output_right)+'}';
         }
         catch (IOException e) {
             System.err.println("Problem reading record: " + input);
